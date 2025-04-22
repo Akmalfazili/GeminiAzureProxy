@@ -25,7 +25,7 @@ namespace GeminiAzureProxy
         }
 
         [Function("Gemini")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req, ExecutionContext context)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
         {
             _geminiService.GetWelcomeMessage();
             string geminiApiKey = _geminiService.GetApiKey();
@@ -88,6 +88,44 @@ namespace GeminiAzureProxy
             public InternalServerErrorResult(object value) : base(value)
             {
                 StatusCode = StatusCodes.Status500InternalServerError;
+            }
+        }
+
+        [Function("FileReader")]
+        public async Task<IActionResult> RunFileReader([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
+        {
+            _geminiService.GetWelcomeMessage();
+            string geminiApiKey = _geminiService.GetApiKey();
+            if (string.IsNullOrEmpty(geminiApiKey))
+            {
+                _logger.LogError("Gemini API Key is not configured");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+            ProcessFileRequest? requestBody = null;
+            try
+            {
+                requestBody = await req.ReadFromJsonAsync<ProcessFileRequest>();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError($"Error deserializing request body: {ex.Message}");
+                return new BadRequestObjectResult("Please provide a valid JSON request body");
+            }
+
+            if (requestBody == null || string.IsNullOrEmpty(requestBody.Prompt) || string.IsNullOrEmpty(requestBody.FilePath))
+            {
+                return new BadRequestObjectResult("Please provice file path and prompt in the request body");
+            }
+
+            string filePath = requestBody.FilePath;
+            string prompt = requestBody.Prompt;
+            string? fileContent = null;
+
+            _logger.LogInformation($"Attempting to read file: '{filePath}'");
+
+            try
+            {
+
             }
         }
     }
