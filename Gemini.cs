@@ -13,6 +13,11 @@ using NPOI.XWPF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.SS.Formula.Functions;
 using NPOI.OpenXmlFormats.Shared;
+using GenerativeAI.Types;
+using MathNet.Numerics.LinearAlgebra;
+using Org.BouncyCastle.Crypto.Macs;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using Newtonsoft.Json;
 
 
 namespace GeminiAzureProxy
@@ -97,62 +102,118 @@ namespace GeminiAzureProxy
             }
         }
 
+        
+
         [Function("FileReader")]
-        public async Task<IActionResult> RunFileReader([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
+        public async Task<IActionResult> RunFileReader([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req, ExecutionContext context)
         {
             _geminiService.GetWelcomeMessage();
+
+            string sessionCacheLocation = _geminiService.GetSessionCache();
+            if (string.IsNullOrEmpty(sessionCacheLocation))
+            {
+                _logger.LogError("Session cache directory is not configured");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+
             string geminiApiKey = _geminiService.GetApiKey();
             if (string.IsNullOrEmpty(geminiApiKey))
             {
                 _logger.LogError("Gemini API Key is not configured");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
-            ProcessFileRequest? requestBody = null;
+            SessionRequest? requestBody = null;
             try
             {
-                requestBody = await req.ReadFromJsonAsync<ProcessFileRequest>();
+                requestBody = await req.ReadFromJsonAsync<SessionRequest>();
             }
-            catch (JsonException ex)
+            catch (System.Text.Json.JsonException ex)
             {
                 _logger.LogError($"Error deserializing request body: {ex.Message}");
-                return new BadRequestObjectResult("Please provide a valid JSON request body");
+                return new BadRequestObjectResult("Please provide a valid JSON request body structure including sessionID, currentPrompt and filePath (optional)");
             }
 
-            if (requestBody == null || string.IsNullOrEmpty(requestBody.Prompt) || string.IsNullOrEmpty(requestBody.FilePath))
+            if (requestBody == null || string.IsNullOrEmpty(requestBody.CurrentPrompt))
             {
-                return new BadRequestObjectResult("Please provide file path and prompt in the request body");
+                return new BadRequestObjectResult("Please provide current prompt in the request body");
             }
 
-            string filePath = requestBody.FilePath;
-            string prompt = requestBody.Prompt;
+            // session management
+            string? sessionId = requestBody.SessionId;
+            List<ConversationTurn>? conversationHistory = new List<ConversationTurn>();
+            string? cachePath = null;
+
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                //new session
+                sessionId = Guid.NewGuid().ToString();
+                _logger.LogInformation($"Starting new session with ID: {sessionId}");
+            }
+            else
+            {
+                //existing session, load history
+                cachePath = Path.Combine(sessionCacheLocation, $"{sessionId}.json");
+
+                if (File.Exists(cachePath))
+                {
+                    try
+                    {
+                        string cacheJson = await File.ReadAllTextAsync(cachePath);
+                        conversationHistory = JsonConvert.DeserializeObject<List<ConversationTurn>>(cacheJson);
+                        _logger.LogInformation($"Loaded conversation history for session {sessionId} with {conversationHistory?.Count} turns");
+                    }
+                    catch (Exception ex) 
+                    {
+                        _logger.LogError($"Error loading history for session {sessionId}: {ex.Message}");
+                        return new InternalServerErrorResult($"Could not load history for session {sessionId}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Session ID {sessionId} but cache file not found at {cachePath}");
+                    return new NotFoundObjectResult($"Session ID {sessionId} not found or cache expired.");
+                }
+
+            }
+
+            cachePath = Path.Combine(sessionCacheLocation, $"{sessionId}.json");
+
+            string? filePath = requestBody.FilePath;
+            //string prompt = requestBody.Prompt;
             string? fileContent = null;
 
-            _logger.LogInformation($"Attempting to read file: '{filePath}'");
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                _logger.LogInformation($"Attempting to read file: '{filePath}'");
 
-            try
-            {
-                if (!File.Exists(filePath))
+                try
                 {
-                    _logger.LogError($"File not found: {filePath}");
-                    return new NotFoundObjectResult($"File not found: {filePath}");
-                }
+                    if (!File.Exists(filePath))
+                    {
+                        _logger.LogError($"File not found: {filePath}");
+                        return new NotFoundObjectResult($"File not found: {filePath}");
+                    }
 
-                //fileContent = await File.ReadAllTextAsync(filePath);
-                fileContent = await ExtractTextFromFileAsync(filePath, _logger);
-                if (fileContent == null)
-                {
-                    return new BadRequestObjectResult($"Could not extract text from file {Path.GetFileName(filePath)}. Ensure it is a supported format (txt, pdf, docx, xlsx/xls etc..) or is a readable text");
+                    //fileContent = await File.ReadAllTextAsync(filePath);
+                    fileContent = await ExtractTextFromFileAsync(filePath, _logger);
+                    if (fileContent == null)
+                    {
+                        return new BadRequestObjectResult($"Could not extract text from file {Path.GetFileName(filePath)}. Ensure it is a supported format (txt, pdf, docx, xlsx/xls etc..) or is a readable text");
+                    }
+                    _logger.LogInformation($"Successfully read content from {filePath}. Content length: {fileContent.Length}");
                 }
-                _logger.LogInformation($"Successfully read content from {filePath}. Content length: {fileContent.Length}");
-            }catch(UnauthorizedAccessException ex)
-            {
-                _logger.LogError($"Permission denied to read file: {filePath}. Error: {ex.Message}");
-                return new UnauthorizedResult();
-            }catch(Exception ex)
-            {
-                _logger.LogError($"An error occured while reading the file {filePath}. Error: {ex.Message}");
-                return new InternalServerErrorResult($"An error occured reading the file: {ex.Message}");
+                catch (UnauthorizedAccessException ex)
+                {
+                    _logger.LogError($"Permission denied to read file: {filePath}. Error: {ex.Message}");
+                    return new UnauthorizedResult();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"An error occured while reading the file {filePath}. Error: {ex.Message}");
+                    return new InternalServerErrorResult($"An error occured reading the file: {ex.Message}");
+                }
             }
+            List<Content>
 
             try
             {

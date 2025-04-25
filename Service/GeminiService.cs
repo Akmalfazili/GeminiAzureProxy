@@ -23,6 +23,10 @@ namespace GeminiAzureProxy.Service
         {
             return _configuration["GeminiApiKey"];
         }
+        public string GetSessionCache()
+        {
+            return _configuration["SessionCache"];
+        }
         public string GetWelcomeMessage()
         {
             _logger.LogInformation("C# HTTP trigger function processed a request");
