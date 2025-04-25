@@ -12,6 +12,7 @@ using System.Text;
 using NPOI.XWPF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.SS.Formula.Functions;
+using NPOI.OpenXmlFormats.Shared;
 
 
 namespace GeminiAzureProxy
@@ -236,52 +237,44 @@ namespace GeminiAzureProxy
                         {
                             IWorkbook workbook;
                             StringBuilder textBuilder = new StringBuilder();
+                            
                             try
                             {
                                 workbook = WorkbookFactory.Create(file);
-
+                               
                                 for (int i = 0; i < workbook.NumberOfSheets; i++)
                                 {
                                     ISheet sheet = workbook.GetSheetAt(i);
                                     if (sheet == null) continue;
                                     textBuilder.Append($"\n--- Sheet: {sheet.SheetName} ---\n");
 
-                                    // Determine the maximum column index used on this sheet
-                                    int maxCellIndex = -1;
-                                    // Iterate through all potential rows in the sheet's used range
-                                    for (int rowIndex = sheet.FirstRowNum; rowIndex <= sheet.LastRowNum; rowIndex++)
+
+                                    int maxColumn = 0;
+                                    int maxRow = sheet.LastRowNum;
+                                    for (int rowIndex= 0; rowIndex <= maxRow; rowIndex++)
                                     {
-                                        IRow tempRow = sheet.GetRow(rowIndex);
-                                        if (tempRow != null)
+                                        if (sheet.GetRow(rowIndex).LastCellNum > maxColumn)
                                         {
-                                            maxCellIndex = Math.Max(maxCellIndex, tempRow.LastCellNum - 1);
+                                            maxColumn= sheet.GetRow(rowIndex).LastCellNum;
                                         }
                                     }
 
-                                    if (maxCellIndex < 0)
+                                    for(int rowIndex=0;rowIndex<=maxRow; rowIndex++)
                                     {
-                                        logger.LogInformation($"Sheet '{sheet.SheetName}' appears to have no data cells within rows {sheet.FirstRowNum} to {sheet.LastRowNum}. Max cell index remains -1.");
-                                    }
-                                    else
-                                    {
-                                        logger.LogInformation($"Sheet '{sheet.SheetName}': Max cell index determined as {maxCellIndex}. Processing rows {sheet.FirstRowNum} to {sheet.LastRowNum}.");
-                                    }
-
-                                    for (int rowIndex = sheet.FirstRowNum; rowIndex <= sheet.LastRowNum; rowIndex++)
-                                    {
-                                        IRow row = sheet.GetRow(rowIndex);
-                                        for (int cellIndex = 0; cellIndex <= maxCellIndex; cellIndex++)
+                                        IRow row= sheet.GetRow(rowIndex);
+                                        for(int cellIndex=0;cellIndex < maxColumn; cellIndex++)
                                         {
-                                            if (cellIndex > 0)
+                                            if(cellIndex > 0)
                                             {
-                                                textBuilder.Append("\t"); // Append tab separator between columns
+                                                textBuilder.Append("\t");
                                             }
-                                            NPOI.SS.UserModel.ICell cell = row?.GetCell(cellIndex);
-                                            textBuilder.Append(cell?.ToString() ?? "");
+                                            NPOI.SS.UserModel.ICell? cell = row?.GetCell(cellIndex,MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                                            textBuilder.Append(cell?.ToString()??" ");
                                         }
                                         textBuilder.Append("\n");
                                     }
                                 }
+                                
                                 return textBuilder.ToString();
                             }
 
