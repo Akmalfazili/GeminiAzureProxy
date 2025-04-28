@@ -15,7 +15,7 @@ namespace GeminiAzureProxy.Model
         [JsonProperty("currentPrompt")]
         public string? CurrentPrompt { get; set; }
 
-        [JsonProperty("filePath")]
-        public string? FilePath { get; set; }
+        [JsonProperty("directoryPath")]
+        public string? DirectoryPath { get; set; }
     }
 }
