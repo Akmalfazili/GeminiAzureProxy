@@ -15,5 +15,8 @@ namespace GeminiAzureProxy.Model
 
         [JsonProperty("modelResponse")]
         public string? ModelResponse { get; set; }
+
+        [JsonProperty("fullConversationHistory")]
+        public List<ConversationTurn>? FullConversationHistory { get; set; }
     }
 }

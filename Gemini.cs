@@ -366,7 +366,8 @@ namespace GeminiAzureProxy
             var responseModel = new SessionResponse
             {
                 SessionId = sessionId,
-                ModelResponse = generatedText
+                ModelResponse = generatedText,
+                FullConversationHistory = conversationHistory
             };
             return new OkObjectResult(responseModel);
 
