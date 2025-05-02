@@ -136,11 +136,27 @@ namespace GeminiAzureProxy
                 return new BadRequestObjectResult("Please provide a valid JSON request body structure including sessionID, currentPrompt and directory Path (optional)");
             }
 
-            if (requestBody == null || string.IsNullOrEmpty(requestBody.CurrentPrompt))
+            if (requestBody == null)
             {
-                return new BadRequestObjectResult("Please provide current prompt in the request body");
+                return new BadRequestObjectResult("Invalid request data");
             }
 
+            //determine if request is to primarily load data
+            bool isLoadHistoryRequest = !string.IsNullOrEmpty(requestBody.SessionId) &&
+                string.IsNullOrEmpty(requestBody.DirectoryPath) &&
+                string.IsNullOrEmpty(requestBody.CurrentPrompt?.Trim());
+
+            if(string.IsNullOrEmpty(requestBody.CurrentPrompt?.Trim()) && !isLoadHistoryRequest)
+            {
+                if (string.IsNullOrEmpty(requestBody.DirectoryPath?.Trim()))
+                {
+                    return new BadRequestObjectResult("Please provide prompt and/or 'directory Path' in the request body, or a valid 'sessionId' to load history.");
+                }
+                if (string.IsNullOrEmpty(requestBody.CurrentPrompt?.Trim()) && !isLoadHistoryRequest)
+                {
+                    return new BadRequestObjectResult("Please provide 'prompt' (or a 'directory Path' with a 'prompt') to start or continue, or a valid 'sessionId' to load history.");
+                }
+            }
             // session management
             string? sessionId = requestBody.SessionId;
             List<ConversationTurn>? conversationHistory = new List<ConversationTurn>();
@@ -191,68 +207,94 @@ namespace GeminiAzureProxy
 
                 try
                 {
-                    if (!Directory.Exists(directoryPath))
+                    if (!Directory.Exists(directoryPath) && !Path.Exists(directoryPath))
                     {
-                        _logger.LogError($"Directory not found: {directoryPath}");
-                        return new NotFoundObjectResult($"Directory not found: {directoryPath}");
+                        _logger.LogError($"Directory/File not found: {directoryPath}");
+                        return new NotFoundObjectResult($"Directory/File not found: {directoryPath}");
                     }
-                    //Get list of files in directory (excluding subdirectories)
-                    string[] files = Directory.GetFiles(directoryPath);
-                    if(files.Length == 0)
+                    StringBuilder contentAccumulator = new StringBuilder();
+                    if (File.Exists(directoryPath))
                     {
-                        _logger.LogWarning($"No files found in directory: {directoryPath}");
-                        combinedFileContent = $"[Note: No files found in directory '{Path.GetFileName(directoryPath)}']\n\n";
+                        try
+                        {
+                            string fileContent = await ExtractTextFromFileAsync(directoryPath, _logger);
+                            if (fileContent != null)
+                            {
+                                contentAccumulator.Append($"--- Start File: {Path.GetFileName(directoryPath)} ---\n");
+                                contentAccumulator.Append(fileContent);
+                                contentAccumulator.Append($"\n--- End File: {Path.GetFileName(directoryPath)} ---\n\n"); // Add newline after each file block
+                                combinedFileContent = contentAccumulator.ToString();
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            _logger.LogError($"An error occured while reading the file {directoryPath}. Error: {ex.Message}");
+                            return new InternalServerErrorResult($"An error occured reading the file: {ex.Message}");
+                        }
                     }
                     else
                     {
-                        _logger.LogInformation($"Found {files.Length} files in '{directoryPath}'. Attempting to extract text.");
-                        StringBuilder contentAccumulator = new StringBuilder();
-                        List<string> skippedFiles = new List<string>();
-
-                        foreach(string file in files)
+                        //Get list of files in directory (excluding subdirectories)
+                        string[] files = Directory.GetFiles(directoryPath);
+                        if (files.Length == 0)
                         {
-                            try
+                            _logger.LogWarning($"No files found in directory: {directoryPath}");
+                            combinedFileContent = $"[Note: No files found in directory '{Path.GetFileName(directoryPath)}']\n\n";
+                        }
+                        else
+                        {
+                            _logger.LogInformation($"Found {files.Length} files in '{directoryPath}'. Attempting to extract text.");
+                            List<string> skippedFiles = new List<string>();
+
+                            foreach (string file in files)
                             {
-                                string fileContent = await ExtractTextFromFileAsync(file, _logger);
-                                if (fileContent != null)
+                                try
                                 {
-                                    contentAccumulator.Append($"--- Start File: {Path.GetFileName(file)} ---\n");
-                                    contentAccumulator.Append(fileContent);
-                                    contentAccumulator.Append($"\n--- End File: {Path.GetFileName(file)} ---\n\n"); // Add newline after each file block
+                                    string fileContent = await ExtractTextFromFileAsync(file, _logger);
+                                    if (fileContent != null)
+                                    {
+                                        contentAccumulator.Append($"--- Start File: {Path.GetFileName(file)} ---\n");
+                                        contentAccumulator.Append(fileContent);
+                                        contentAccumulator.Append($"\n--- End File: {Path.GetFileName(file)} ---\n\n"); // Add newline after each file block
+                                    }
+                                    else
+                                    {
+                                        skippedFiles.Add(Path.GetFileName(file));
+                                    }
                                 }
-                                else
+                                catch (Exception ex)
                                 {
+                                    _logger.LogError($"Error processing single file '{file}': {ex.Message}");
                                     skippedFiles.Add(Path.GetFileName(file));
                                 }
-                            }catch(Exception ex)
-                            {
-                                _logger.LogError($"Error processing single file '{file}': {ex.Message}");
-                                skippedFiles.Add(Path.GetFileName(file));
                             }
-                        }
-                        if(contentAccumulator.Length > 0)
-                        {
-                            combinedFileContent = contentAccumulator.ToString();
-                            _logger.LogInformation($"Successfully extracted content from {files.Length - skippedFiles.Count} files. Combined length: {combinedFileContent.Length}");
-                        }else if(skippedFiles.Count == files.Length)
-                        {
-                            _logger.LogWarning($"Could not extract text from ANY of the {files.Length} files in '{directoryPath}'.");
-                            return new BadRequestObjectResult($"Could not extract text from any files in directory '{Path.GetFileName(directoryPath)}'. Supported formats: txt, pdf, docx, xls, xlsx...etc or is a readable text");
-                        }
+                            if (contentAccumulator.Length > 0)
+                            {
+                                combinedFileContent = contentAccumulator.ToString();
+                                _logger.LogInformation($"Successfully extracted content from {files.Length - skippedFiles.Count} files. Combined length: {combinedFileContent.Length}");
+                            }
+                            else if (skippedFiles.Count == files.Length)
+                            {
+                                _logger.LogWarning($"Could not extract text from ANY of the {files.Length} files in '{directoryPath}'.");
+                                return new BadRequestObjectResult($"Could not extract text from any files in directory '{Path.GetFileName(directoryPath)}'. Supported formats: txt, pdf, docx, xls, xlsx...etc or is a readable text");
+                            }
 
-                        if (skippedFiles.Any())
-                        {
-                            if (combinedFileContent == null)
+                            if (skippedFiles.Any())
                             {
-                                combinedFileContent = "";
-                                combinedFileContent = $"[Note: Skipped {skippedFiles.Count} file(s) due to errors or unsupported format: {string.Join(", ", skippedFiles)}]\n\n" + combinedFileContent;
-                                _logger.LogWarning($"Skipped {skippedFiles.Count} files: {string.Join(", ", skippedFiles)}");
-                            }else if (contentAccumulator.Length > 0)
-                            {
-                                _logger.LogInformation($"Processed all {files.Length} files successfully from '{directoryPath}'.");
+                                if (combinedFileContent == null)
+                                {
+                                    combinedFileContent = "";
+                                    combinedFileContent = $"[Note: Skipped {skippedFiles.Count} file(s) due to errors or unsupported format: {string.Join(", ", skippedFiles)}]\n\n" + combinedFileContent;
+                                    _logger.LogWarning($"Skipped {skippedFiles.Count} files: {string.Join(", ", skippedFiles)}");
+                                }
+                                else if (contentAccumulator.Length > 0)
+                                {
+                                    _logger.LogInformation($"Processed all {files.Length} files successfully from '{directoryPath}'.");
+                                }
                             }
                         }
                     }
+                    
                 }
                 catch (UnauthorizedAccessException ex)
                 {

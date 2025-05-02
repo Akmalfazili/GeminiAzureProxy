@@ -1,0 +1,18 @@
+[
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "hello, how are you"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "I am doing well, thank you for asking! How can I help you today?\n"
+      }
+    ]
+  }
+]

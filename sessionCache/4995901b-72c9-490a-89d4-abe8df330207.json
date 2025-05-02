@@ -1,0 +1,34 @@
+[
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "hi"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Hi there! How can I help you today?\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "dde"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "DDE stands for **Dynamic Data Exchange**.\n\nIt's a legacy technology in Windows that allows applications to share data with each other in real-time. Think of it as a communication channel between applications.\n\nHere's a simple breakdown:\n\n*   **What it does:** Allows one application (the client) to request data from another application (the server). If the data in the server application changes, the client application is automatically updated.\n*   **Example:** Imagine a spreadsheet program (the client) displaying stock quotes from a stock ticker program (the server). As the stock prices change in the stock ticker, the spreadsheet is automatically updated.\n*   **Why it's \"legacy\":** DDE is an older technology that has largely been superseded by more robust and efficient methods like OLE (Object Linking and Embedding) and other forms of inter-process communication. DDE has known security vulnerabilities and is generally not recommended for new development.\n\nDo you have any specific questions about DDE that I can help you with? For example:\n\n*   Are you trying to use DDE in a specific application?\n*   Are you troubleshooting a DDE-related error?\n*   Are you curious about the differences between DDE and other technologies?\n"
+      }
+    ]
+  }
+]

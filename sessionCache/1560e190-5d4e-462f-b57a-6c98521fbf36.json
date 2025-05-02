@@ -1,0 +1,59 @@
+[
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Regarding the content of the files in the directory 'akmal.txt': \n\n---\n--- Start File: akmal.txt ---\n\n--- End File: akmal.txt ---\n\n\n---\n\n"
+      },
+      {
+        "text": "whats inside this doc"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Based on the provided information, the file `akmal.txt` is **empty**. There is nothing between the \"Start File: akmal.txt\" and \"End File: akmal.txt\" markers.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Regarding the content of the files in the directory 'AkmalBinFazili_Resume_2023.pdf': \n\n---\n--- Start File: AkmalBinFazili_Resume_2023.pdf ---\nAkmalBinFaziliakmalfaz6@gmail.com│+6594568642EDUCATION_________________________________________________________________NATIONALUNIVERSITYOFSINGAPOREAug2019–May2023BBA(BusinessAnalytics,Accountancy&Finance),DistinctionwithHonoursEXPERIENCE________________________________________________________________CloudEngineerTrainee|TataConsultancyServicesJul2023–Present•CompanyLedTraining(CLT)underIMDA’sTechSkillsAccelerator(TeSA)Program•Developedadynamicwebapplicationusinga3-tieredarchitecturebyutilisingJavaDatabaseConnectivity(JDBC),SpringFramework,HibernateandApacheTomcatforseamlessdeploymentandensuringoptimalperformance•DesignedandimplementedbasicCRUDfunctionalitieswithinthewebapplication,enhancinguserinteractivity•Completedfoundationalcloudtraining,gainingproficiencyincloudarchitectureandservices•AchievedAWSCertifiedCloudPractitionercertification(W1T7FX4L52Q1Q5ST)DATAANALYSTINTERN|SingtelJan2023–Apr2023•PerformedUserAcceptanceTesting(UAT)ontheCRMsystem,employingcomplexOracleSQLscriptstovalidatedataintegrityandresolveissuesforprecisereportingDATAANALYSTINTERN|AuditorGeneral’sOfficeSingaporeDec2022–Jan2023•AppliedPythonandNaturalLanguageProcessing(NLP)librariesfordataanalysistodetectsuspiciousbidsintenders,visualizingresultswithgraphsandtoolssuchasNumPy,Nltk,Pandas,PlotlyExpress,andSklearnBUSINESSANALYSTINTERN|NovelshipPteLtdMay2022–Aug2022•ExtracteduserdemographicdatausingPostgreSQLandutilizeddatavisualizationtoolslikeTableautogenerateinsightsintouserprofilesthroughgraphsandheatmaps•Contributedtoa1%increaseinGMVbylaunchinganewproductthroughanalysismadePROJECTS__________________________________________________________________sgmuslimownedfood.com|Co-FounderandWebDeveloperOct2023–Present•Establishedanddesignedsgmuslimownedfood.comusingWix,creatinganaccessibleplatformfordiscoveringMuslim-ownedeateriesinSingapore•ImplementedGoogleAPItofetchanddisplayGooglereviewsforthelistedeateries,enhancingthewebsite'scredibility,userexperienceandSEOADDITIONALINFORMATION___________________________________________________•Language:FluentinwrittenandspokenEnglishandMalay•Software:ProficientinMicrosoftOffice,Python,SQL,R,Tableau,PowerBIandJava•Certifications:AWSCertifiedCloudPractitioner(W1T7FX4L52Q1Q5ST)\n--- Page Break ---\n\n--- End File: AkmalBinFazili_Resume_2023.pdf ---\n\n\n---\n\n"
+      },
+      {
+        "text": "whats the occupation is the user?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Based on the content of the resume, the user's occupation is currently **Cloud Engineer Trainee** at Tata Consultancy Services.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Regarding the content of the files in the directory 'sample': \n\n---\n--- Start File: index.html ---\n<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <link rel=\"stylesheet\" href=\"style.css\" />\n    <title>Expanding Cards</title>\n  </head>\n  <body>\n    <div class=\"container\">\n      <div class=\"panel active\" style=\"background-image: url('https://images.unsplash.com/photo-1558979158-65a1eaa08691?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80')\">\n        <h3>Explore The World</h3>\n      </div>\n      <div class=\"panel\" style=\"background-image: url('https://images.unsplash.com/photo-1572276596237-5db2c3e16c5d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80')\">\n        <h3>Wild Forest</h3>\n      </div>\n      <div class=\"panel\" style=\"background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1353&q=80')\">\n        <h3>Sunny Beach</h3>\n      </div>\n      <div class=\"panel\" style=\"background-image: url('https://images.unsplash.com/photo-1551009175-8a68da93d5f9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1351&q=80')\">\n        <h3>City on Winter</h3>\n      </div>\n      <div class=\"panel\" style=\"background-image: url('https://images.unsplash.com/photo-1549880338-65ddcdfd017b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80')\">\n        <h3>Mountains - Clouds</h3>\n      </div>\n\n    </div>\n\n    <script src=\"script.js\"></script>\n  </body>\n</html>\n\n--- End File: index.html ---\n\n--- Start File: script.js ---\nconst panels = document.querySelectorAll('.panel')\n\npanels.forEach(panel => {\n    panel.addEventListener('click', () => {\n        removeActiveClasses()\n        panel.classList.add('active')\n    })\n})\n\nfunction removeActiveClasses() {\n    panels.forEach(panel => {\n        panel.classList.remove('active')\n    })\n}\n--- End File: script.js ---\n\n--- Start File: style.css ---\n@import url('https://fonts.googleapis.com/css?family=Muli&display=swap');\n\n* {\n  box-sizing: border-box;\n}\n\nbody {\n  font-family: 'Muli', sans-serif;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  height: 100vh;\n  overflow: hidden;\n  margin: 0;\n}\n\n.container {\n  display: flex;\n  width: 90vw;\n}\n\n.panel {\n  background-size: cover;\n  background-position: center;\n  background-repeat: no-repeat;\n  height: 80vh;\n  border-radius: 50px;\n  color: #fff;\n  cursor: pointer;\n  flex: 0.5;\n  margin: 10px;\n  position: relative;\n  -webkit-transition: all 700ms ease-in;\n}\n\n.panel h3 {\n  font-size: 24px;\n  position: absolute;\n  bottom: 20px;\n  left: 20px;\n  margin: 0;\n  opacity: 0;\n}\n\n.panel.active {\n  flex: 5;\n}\n\n.panel.active h3 {\n  opacity: 1;\n  transition: opacity 0.3s ease-in 0.4s;\n}\n\n@media (max-width: 480px) {\n  .container {\n    width: 100vw;\n  }\n\n  .panel:nth-of-type(4),\n  .panel:nth-of-type(5) {\n    display: none;\n  }\n}\n\n--- End File: style.css ---\n\n\n---\n\n"
+      },
+      {
+        "text": "how would the webpage look like?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "The webpage will display a row of expanding cards, each with a different background image and a title that appears when the card is active (expanded).\n\nHere's a breakdown:\n\n*   **Layout:**  The content will be horizontally centered.\n*   **Cards:** There are five cards (divs with the class \"panel\") arranged in a row within a container.\n*   **Images:** Each card has a background image set using inline CSS. The images are from unsplash.com and depict:\n    *   \"Explore The World\"\n    *   \"Wild Forest\"\n    *   \"Sunny Beach\"\n    *   \"City on Winter\"\n    *   \"Mountains - Clouds\"\n*   **Active State:** Initially, the first card has the class \"active,\" meaning it will be wider than the others.\n*   **Titles:**  Each card has a title (`<h3>` element) that is initially hidden (opacity: 0). When a card becomes active, its title fades in.\n*   **Interactivity:**  When a card is clicked, the \"active\" class is removed from the currently active card and added to the clicked card, causing it to expand and display its title.\n*   **Responsiveness:**  For smaller screens (max-width: 480px), the fourth and fifth cards will be hidden.\n\nIn summary, you'll see a webpage with a row of image-filled cards. One card will be expanded initially. Clicking on any card will expand that card and shrink the others, displaying the clicked card's title.\n"
+      }
+    ]
+  }
+]
