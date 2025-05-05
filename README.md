@@ -66,6 +66,7 @@ You need to configure your Google Gemini API Key and define the local directory 
         "AzureWebJobsStorage": "", // Not strictly needed for HTTP trigger with local state
         "FUNCTIONS_WORKER_RUNTIME": "dotnet",
         "GeminiApiKey": "YOUR_GEMINI_API_KEY_HERE", // <-- Paste your key here
+        "SessionHistory":"YOUR_CHAT_HISTORY_FOLDER_DIRECTORY" // Directory within your local computer
       },
       "Host": { "CORS": "*" }
     }
